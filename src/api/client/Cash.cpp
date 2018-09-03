@@ -30,7 +30,6 @@ api::client::Cash* Factory::Cash(
 
 namespace opentxs::api::client::implementation
 {
-#if OT_CASH
 Cash::Cash(const api::Core& api, const client::ServerAction& serverAction)
     : api_(api)
     , server_action_(serverAction)
@@ -38,6 +37,7 @@ Cash::Cash(const api::Core& api, const client::ServerAction& serverAction)
     // WARNING: do not access api_.Wallet() during construction
 }
 
+#if OT_CASH
 bool Cash::deposit_cash(
     const std::string& notaryID,
     const std::string& nymID,

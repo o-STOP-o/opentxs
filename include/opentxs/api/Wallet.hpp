@@ -55,6 +55,24 @@ public:
         const class Nym& signer,
         Account::AccountType type,
         TransactionNumber stash) const = 0;
+    /** Create a nym using HD key derivation
+     *
+     *  All keys associated with nyms created via this method can be recovered
+     *  via the wallet seed (12/24 words).
+     *
+     *  \param[in] seed (optional)  Specify a custom HD seed fingerprint. If
+     *                              blank or not found, the default wallet seed
+     *                              will be used.
+     *  \param[in] index (optional) Derivation path of the nym to be created. A
+     *                              negative value will use the next index for
+     *                              the specified seed.
+     *  \returns nym id for the new nym on success, or an empty string
+     */
+    EXPORT virtual std::string CreateNymHD(
+        const proto::ContactItemType type,
+        const std::string& name,
+        const std::string& fingerprint = "",
+        const std::int32_t index = -1) const = 0;
     EXPORT virtual bool DeleteAccount(const Identifier& accountID) const = 0;
     EXPORT virtual SharedAccount IssuerAccount(
         const Identifier& unitID) const = 0;

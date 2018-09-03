@@ -1596,6 +1596,8 @@ void Storage::save(opentxs::storage::Root* in, const Lock& lock) const
     multiplex_.StoreRoot(true, in->root_);
 }
 
+ObjectList Storage::SeedList() const { return Root().Tree().SeedNode().List(); }
+
 bool Storage::SetContactAlias(const std::string& id, const std::string& alias)
     const
 {

@@ -154,6 +154,7 @@ public:
         const Identifier& serverID,
         const Identifier& accountID,
         std::unique_ptr<Cheque>& cheque);
+#if OT_CASH
     explicit OTAPI_Func(
         OTAPI_Func_Type theType,
         std::recursive_mutex& apilock,
@@ -162,6 +163,7 @@ public:
         const Identifier& serverID,
         const Identifier& nymID2,
         std::unique_ptr<Purse>& purse);
+#endif
     explicit OTAPI_Func(
         OTAPI_Func_Type theType,
         std::recursive_mutex& apilock,
@@ -251,6 +253,7 @@ public:
         const std::string& primary,
         const std::string& secondary,
         const proto::SecretType& secretType);
+#if OT_CASH
     explicit OTAPI_Func(
         OTAPI_Func_Type theType,
         std::recursive_mutex& apilock,
@@ -260,6 +263,7 @@ public:
         const Identifier& recipientID,
         std::unique_ptr<const Purse>& purse,
         std::unique_ptr<const Purse>& senderPurse);
+#endif
     explicit OTAPI_Func(
         OTAPI_Func_Type theType,
         std::recursive_mutex& apilock,
@@ -351,8 +355,10 @@ private:
     std::unique_ptr<Message> request_;
     std::unique_ptr<OTSmartContract> contract_;
     std::unique_ptr<OTPaymentPlan> paymentPlan_;
+#if OT_CASH
     std::unique_ptr<const Purse> purse_;
     std::unique_ptr<const Purse> senderPurse_;
+#endif
     std::unique_ptr<Cheque> cheque_;
     std::unique_ptr<Ledger> ledger_;
     std::unique_ptr<const OTPayment> payment_;
@@ -373,7 +379,9 @@ private:
     bool direction_{false};
     bool isPrimary_{false};
     bool selling_{false};
+#if OT_CASH
     bool cash_{false};
+#endif
     bool resync_{false};
     time64_t lifetime_{OT_TIME_ZERO};
     std::int32_t nRequestNum_{-1};

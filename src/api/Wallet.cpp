@@ -13,6 +13,7 @@
 #include "opentxs/api/storage/Storage.hpp"
 #include "opentxs/api/Core.hpp"
 #include "opentxs/api/Endpoints.hpp"
+#include "opentxs/api/Factory.hpp"
 #include "opentxs/api/Identity.hpp"
 #include "opentxs/client/NymData.hpp"
 #include "opentxs/client/OT_API.hpp"
@@ -35,6 +36,7 @@
 #include "opentxs/network/zeromq/Message.hpp"
 #include "opentxs/Types.hpp"
 
+#include "api/client/InternalClient.hpp"
 #include "core/InternalCore.hpp"
 #include "Exclusive.tpp"
 #include "Shared.tpp"
@@ -359,6 +361,74 @@ ExclusiveAccount Wallet::CreateAccount(
     }
 
     return {};
+}
+
+std::string Wallet::CreateNymHD(
+    const proto::ContactItemType type,
+    const std::string& name,
+    const std::string& fingerprint,
+    const std::int32_t index) const
+{
+#if OT_CRYPTO_SUPPORTED_KEY_HD
+    switch (type) {
+        case proto::CITEMTYPE_INDIVIDUAL:
+        case proto::CITEMTYPE_ORGANIZATION:
+        case proto::CITEMTYPE_BUSINESS:
+        case proto::CITEMTYPE_GOVERNMENT:
+        case proto::CITEMTYPE_SERVER:
+        case proto::CITEMTYPE_BOT: {
+            break;
+        }
+        default: {
+            otOut << OT_METHOD << __FUNCTION__ << ": Invalid nym type."
+                  << std::endl;
+
+            return {};
+        }
+    }
+
+    NymParameters nymParameters(proto::CREDTYPE_HD);
+
+    if (0 < fingerprint.size()) { nymParameters.SetSeed(fingerprint); }
+
+    if (0 > index) {
+        nymParameters.SetUseAutoIndex(true);
+    } else {
+        nymParameters.SetNym(index);
+    }
+
+    auto nym = Nym(nymParameters, type, name);
+
+    if (nullptr == nym) {
+        otOut << OT_METHOD << __FUNCTION__ << ": Failed trying to create Nym."
+              << std::endl;
+
+        return {};
+    }
+
+#if OT_CRYPTO_SUPPORTED_SOURCE_BIP47
+    auto code = api_.Factory().PaymentCode(nym->PaymentCode());
+#endif
+    auto contacts = opentxs::Factory::Contacts(api_);
+
+    OT_ASSERT(false != bool(contacts));
+
+    [[maybe_unused]] auto contact = contacts->NewContact(
+        name,
+        nym->ID()
+#if OT_CRYPTO_SUPPORTED_SOURCE_BIP47
+            ,
+        code
+#endif
+    );
+
+    return nym->ID().str();
+#else
+    otOut << OT_METHOD << __FUNCTION__ << ": No support for HD key derivation."
+          << std::endl;
+
+    return {};
+#endif
 }
 
 bool Wallet::DeleteAccount(const Identifier& accountID) const

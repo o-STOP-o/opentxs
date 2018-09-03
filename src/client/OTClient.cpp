@@ -78,8 +78,12 @@ OTClient::OTClient(
     const api::client::Activity& activity,
     const api::client::Contacts& contacts,
     const api::client::Workflow& workflow)
-    : m_pWallet(theWallet)
-    , api_(core)
+    :
+#if OT_CASH
+    m_pWallet(theWallet)
+    ,
+#endif
+    api_(core)
     , activity_(activity)
     , contacts_(contacts)
     , workflow_(workflow)

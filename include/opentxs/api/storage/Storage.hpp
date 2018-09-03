@@ -259,6 +259,7 @@ public:
     virtual void RunGC() const = 0;
     virtual std::string ServerAlias(const std::string& id) const = 0;
     virtual ObjectList ServerList() const = 0;
+    virtual ObjectList SeedList() const = 0;
     virtual bool SetContactAlias(
         const std::string& id,
         const std::string& alias) const = 0;

@@ -117,6 +117,10 @@ public:
     EXPORT virtual OTIdentifier ScheduleDownloadNymbox(
         const Identifier& localNymID,
         const Identifier& serverID) const = 0;
+    EXPORT virtual OTIdentifier ScheduleIssueUnitDefinition(
+        const Identifier& localNymID,
+        const Identifier& serverID,
+        const Identifier& unitID) const = 0;
     EXPORT virtual OTIdentifier SchedulePublishServerContract(
         const Identifier& localNymID,
         const Identifier& serverID,

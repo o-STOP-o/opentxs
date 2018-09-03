@@ -254,6 +254,7 @@ public:
         const std::string& threadId,
         const std::string& newID) const override;
     void RunGC() const override;
+    ObjectList SeedList() const override;
     std::string ServerAlias(const std::string& id) const override;
     ObjectList ServerList() const override;
     bool SetContactAlias(const std::string& id, const std::string& alias)

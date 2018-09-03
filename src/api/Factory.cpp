@@ -467,6 +467,7 @@ std::unique_ptr<opentxs::Message> Factory::Message() const
     return message;
 }
 
+#if OT_CASH
 std::unique_ptr<opentxs::Mint> Factory::Mint() const
 {
     std::unique_ptr<opentxs::Mint> pMint;
@@ -535,7 +536,7 @@ std::unique_ptr<opentxs::Mint> Factory::Mint(
 #endif
     return pMint;
 }
-
+#endif
 std::unique_ptr<OTOffer> Factory::Offer() const
 {
     std::unique_ptr<OTOffer> offer;

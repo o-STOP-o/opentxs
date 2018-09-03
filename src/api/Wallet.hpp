@@ -30,6 +30,11 @@ public:
         const opentxs::Nym& signer,
         Account::AccountType type,
         TransactionNumber stash) const override;
+    std::string CreateNymHD(
+        const proto::ContactItemType type,
+        const std::string& name,
+        const std::string& fingerprint = "",
+        const std::int32_t index = -1) const override;
     bool DeleteAccount(const Identifier& accountID) const override;
     SharedAccount IssuerAccount(const Identifier& unitID) const override;
     ExclusiveAccount mutable_Account(

@@ -32,6 +32,7 @@
 #include "opentxs/contact/ContactData.hpp"
 #include "opentxs/contact/ContactGroup.hpp"
 #include "opentxs/contact/ContactItem.hpp"
+#include "opentxs/core/contract/UnitDefinition.hpp"
 #include "opentxs/core/crypto/OTPassword.hpp"
 #include "opentxs/core/Account.hpp"
 #include "opentxs/core/Cheque.hpp"
@@ -1244,6 +1245,49 @@ const Identifier& Sync::IntroductionServer() const
     return *introduction_server_id_;
 }
 
+bool Sync::issue_unit_definition(
+    const Identifier& taskID,
+    const Identifier& nymID,
+    const Identifier& serverID,
+    const Identifier& unitID) const
+{
+    OT_ASSERT(false == nymID.empty())
+    OT_ASSERT(false == serverID.empty())
+    OT_ASSERT(false == unitID.empty())
+
+    auto unitdefinition = client_.Wallet().UnitDefinition(unitID);
+    if (false == bool(unitdefinition)) {
+        otErr << OT_METHOD << __FUNCTION__ << ": Unit definition not found"
+              << std::endl;
+
+        return false;
+    }
+
+    auto action = client_.ServerAction().IssueUnitDefinition(
+        nymID, serverID, unitdefinition->PublicContract());
+    action->Run();
+
+    if (SendResult::VALID_REPLY == action->LastSendResult()) {
+        OT_ASSERT(action->Reply());
+
+        if (action->Reply()->m_bSuccess) {
+            client_.Pair().Update();
+
+            return finish_task(taskID, true);
+        } else {
+            otErr << OT_METHOD << __FUNCTION__
+                  << ": Failed to issue unit definition for " << unitID.str()
+                  << " on server " << serverID.str() << std::endl;
+        }
+    } else {
+        otErr << OT_METHOD << __FUNCTION__
+              << ": Communication error while issuing unit definition"
+              << " on server " << serverID.str() << std::endl;
+    }
+
+    return finish_task(taskID, false);
+}
+
 void Sync::load_introduction_server(const Lock& lock) const
 {
     OT_ASSERT(verify_lock(lock, introduction_server_lock_))
@@ -1932,6 +1976,22 @@ OTIdentifier Sync::ScheduleDownloadNymbox(
     return schedule_download_nymbox(localNymID, serverID);
 }
 
+OTIdentifier Sync::ScheduleIssueUnitDefinition(
+    const Identifier& localNymID,
+    const Identifier& serverID,
+    const Identifier& unitID) const
+{
+    // return schedule_register_account(localNymID, serverID, unitID);
+    CHECK_ARGS(localNymID, serverID, unitID)
+
+    start_introduction_server(localNymID);
+    auto& queue = get_operations({localNymID, serverID});
+    const auto taskID(Identifier::Random());
+
+    return start_task(
+        taskID, queue.issue_unit_definition_.Push(taskID, unitID));
+}
+
 OTIdentifier Sync::SchedulePublishServerContract(
     const Identifier& localNymID,
     const Identifier& serverID,
@@ -2585,6 +2645,27 @@ void Sync::state_machine(const ContextID id, OperationQueue& queue) const
             }
 
             registerNym |= !register_account(taskID, nymID, serverID, unitID);
+        }
+
+        SHUTDOWN()
+
+        // Issue unit definitions which have been scheduled
+        while (queue.issue_unit_definition_.Pop(taskID, unitID)) {
+            SHUTDOWN()
+
+            if (unitID->empty()) {
+                otErr << OT_METHOD << __FUNCTION__
+                      << ": How did an empty unit ID get in here?" << std::endl;
+
+                continue;
+            } else {
+                otWarn << OT_METHOD << __FUNCTION__
+                       << ": Issuing unit definition for " << unitID->str()
+                       << " on " << serverID->str() << std::endl;
+            }
+
+            registerNym |=
+                !issue_unit_definition(taskID, nymID, serverID, unitID);
         }
 
         SHUTDOWN()

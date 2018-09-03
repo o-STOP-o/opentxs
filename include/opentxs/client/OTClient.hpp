@@ -66,7 +66,9 @@ public:
         const api::client::Workflow& workflow);
 
 private:
+#if OT_CASH
     OTWallet& m_pWallet;
+#endif
     const api::Core& api_;
     const api::client::Activity& activity_;
     const api::client::Contacts& contacts_;

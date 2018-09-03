@@ -2245,9 +2245,11 @@ void Notary::NotarizeDeposit(
 
     const String strNymID(NYM_ID), strAccountID(ACCOUNT_ID);
 
+#if OT_CASH
     std::shared_ptr<Mint> pMint{nullptr};
     // the Mint's funds for cash withdrawals.
     [[maybe_unused]] ExclusiveAccount pMintCashReserveAcct {};
+#endif
     // Here we find out if we're depositing cash, or a cheque
     itemType theReplyItemType = itemType::error_state;
 

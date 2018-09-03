@@ -114,6 +114,10 @@ public:
     OTIdentifier ScheduleDownloadNymbox(
         const Identifier& localNymID,
         const Identifier& serverID) const override;
+    OTIdentifier ScheduleIssueUnitDefinition(
+        const Identifier& localNymID,
+        const Identifier& serverID,
+        const Identifier& unitID) const override;
     OTIdentifier SchedulePublishServerContract(
         const Identifier& localNymID,
         const Identifier& serverID,
@@ -185,6 +189,7 @@ private:
         UniqueQueue<OTIdentifier> download_account_;
         UniqueQueue<OTIdentifier> download_contract_;
         UniqueQueue<bool> download_nymbox_;
+        UniqueQueue<OTIdentifier> issue_unit_definition_;
         UniqueQueue<OTIdentifier> register_account_;
         UniqueQueue<bool> register_nym_;
         UniqueQueue<MessageTask> send_message_;
@@ -295,6 +300,11 @@ private:
     UniqueQueue<OTIdentifier>& get_nym_fetch(const Identifier& serverID) const;
     OperationQueue& get_operations(const ContextID& id) const;
     OTIdentifier import_default_introduction_server(const Lock& lock) const;
+    bool issue_unit_definition(
+        const Identifier& taskID,
+        const Identifier& nymID,
+        const Identifier& serverID,
+        const Identifier& unitID) const;
     void load_introduction_server(const Lock& lock) const;
     bool message_nym(
         const Identifier& taskID,
